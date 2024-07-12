@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
-const User = require("../models/User");
+const SecretAdminCode = require("../models/secretAdminCode");
+const Register = require("../models/Register");
+const { errorHandler } = require("../../middleware/errorHandlers");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const adminLayout = "../views/layouts/admin";
+const adminLayoutRegister = "../views/layouts/admin_register";
 const jwtSecret = process.env.JWT_SECRET;
 
 /**
@@ -22,11 +25,114 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, jwtSecret);
     req.userId = decoded.userId;
+    req.username = decoded.username;
     next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+//-------------------------------------------//
+/**
+ * GET /register
+ * Registration Page
+ */
+router.get("/register", async (req, res) => {
+  try {
+    const locals = {
+      title: "Register",
+      description: "Simple Blog created with NodeJs, Express & MongoDb.",
+    };
+
+    res.render("admin/admin_register", { locals, layout: adminLayoutRegister });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server Error");
+  }
+});
+
+/**
+ * POST /register
+ * Handle Registration Form Submission
+ */
+// Register route
+const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+
+router.post("/register", async (req, res, next) => {
+  try {
+    const {
+      username,
+      email,
+      phone,
+      position,
+      uniqueId,
+      password,
+      confirmPassword,
+    } = req.body;
+
+    // Basic validation
+    if (
+      !username ||
+      !email ||
+      !phone ||
+      !position ||
+      !uniqueId ||
+      !password ||
+      !confirmPassword
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match" });
+    }
+
+    // Additional password validation
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special symbol (!@#$%^&*)",
+      });
+    }
+
+    // Check if the user already exists
+    const existingUser = await Register.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: "Username already taken" });
+    }
+
+    // Validate against admins_secret_code collection
+    const adminCode = await SecretAdminCode.findOne({
+      username,
+      position,
+      uniqueId,
+    });
+    if (!adminCode) {
+      return res.status(400).json({ error: "Invalid admin credentials" });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Save the user to the database using the Register model
+    const newUser = new Register({
+      username,
+      email,
+      phone,
+      position,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // Redirect to admin page on success
+    res.redirect("/admin");
+  } catch (error) {
+    // Pass the error to the error handling middleware
+    next(error);
+  }
+});
+
+//----------------------------------------//
 
 /**
  * GET /
@@ -53,26 +159,42 @@ router.post("/admin", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const user = await User.findOne({ username });
+    const user = await Register.findOne({ username });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials - No User found!" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials - Password incorrect!" });
     }
 
-    const token = jwt.sign({ userId: user._id }, jwtSecret);
-    res.cookie("token", token, { httpOnly: true });
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      jwtSecret,
+      { expiresIn: "2m" } // Token expires in 2 minutes
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 2 * 60 * 1000, // Cookie expires in 2 minutes
+      sameSite: "Strict",
+    });
+
     res.redirect("/dashboard");
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
+//--------------------
 /**
  * GET /
  * Admin Dashboard
@@ -179,47 +301,6 @@ router.put("/edit-post/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// router.post('/admin', async (req, res) => {
-//   try {
-//     const { username, password } = req.body;
-
-//     if(req.body.username === 'admin' && req.body.password === 'password') {
-//       res.send('You are logged in.')
-//     } else {
-//       res.send('Wrong username or password');
-//     }
-
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
-
-/**
- * POST /
- * Admin - Register
- */
-router.post("/register", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    try {
-      const user = await User.create({
-        username,
-        password: hashedPassword,
-      });
-      res.status(201).json({ message: "User Created", user });
-    } catch (error) {
-      if (error.code === 11000) {
-        res.status(409).json({ message: "User already in use" });
-      }
-      res.status(500).json({ message: "Internal server error" });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-});
-
 /**
  * DELETE /
  * Admin - Delete Post
@@ -242,5 +323,8 @@ router.get("/logout", (req, res) => {
   //res.json({ message: 'Logout successful.'});
   res.redirect("/");
 });
+
+// Register error handler middleware
+router.use(errorHandler);
 
 module.exports = router;

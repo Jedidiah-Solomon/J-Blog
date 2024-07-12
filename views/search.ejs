@@ -3,17 +3,20 @@
 </div>
 
 <section class="articles">
-
+  <% if (data.length === 0) { %>
+  <p>No Post Found</p>
+  <% } else { %>
   <ul class="article-ul">
     <% data.forEach(post => { %>
-      <li>
-        <a href="/post/<%= post._id %>">
-          <span><%= post.title %></span>
-          <span class="article-list__date"><%= post.createdAt.toDateString() %></span>
-        </a>
-      </li>
+    <li>
+      <a href="/post/<%= post._id %>">
+        <span><%= post.title %></span>
+        <span class="article-list__date"
+          ><%= post.createdAt.toDateString() %></span
+        >
+      </a>
+    </li>
     <% }) %>
   </ul>
-
-
+  <% } %>
 </section>
