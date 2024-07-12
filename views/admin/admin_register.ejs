@@ -1,4 +1,8 @@
 <h3>Register</h3>
+
+<div id="error-message" class="signup-error-message"></div>
+<div id="success-message" class="signup-success-message"></div>
+
 <form id="registerForm" action="/register" method="POST">
   <label for="username"><b>Username</b></label>
   <input type="text" placeholder="Enter Username" name="username" required />
@@ -11,6 +15,7 @@
 
   <label for="position"><b>Position</b></label>
   <select name="position" required>
+    <option value="">Select Position</option>
     <option value="CEO">CEO</option>
     <option value="Editor">Editor</option>
     <option value="Staff">Staff</option>
@@ -37,3 +42,59 @@
 
   <input type="submit" value="Register" class="btn" />
 </form>
+
+<script>
+  document
+    .getElementById("registerForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const username = document.getElementsByName("username")[0].value;
+      const email = document.getElementsByName("email")[0].value;
+      const phone = document.getElementsByName("phone")[0].value;
+      const position = document.getElementsByName("position")[0].value;
+      const uniqueId = document.getElementsByName("uniqueId")[0].value;
+      const password = document.getElementsByName("password")[0].value;
+      const confirmPassword =
+        document.getElementsByName("confirmPassword")[0].value;
+
+      try {
+        const response = await fetch("/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            phone,
+            position,
+            uniqueId,
+            password,
+            confirmPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error);
+        }
+
+        // Display success message and redirect after a short delay
+        const successDiv = document.getElementById("success-message");
+        successDiv.textContent = data.message;
+        successDiv.style.display = "block";
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 1500);
+      } catch (error) {
+        const errorDiv = document.getElementById("error-message");
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = "block";
+        setTimeout(() => {
+          errorDiv.style.display = "none";
+        }, 5000);
+      }
+    });
+</script>

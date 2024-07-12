@@ -124,10 +124,8 @@ router.post("/register", async (req, res, next) => {
 
     await newUser.save();
 
-    // Redirect to admin page on success
-    res.redirect("/admin");
+    return res.status(200).json({ message: "Registration successful" });
   } catch (error) {
-    // Pass the error to the error handling middleware
     next(error);
   }
 });
@@ -181,13 +179,16 @@ router.post("/admin", async (req, res) => {
       { expiresIn: "2m" } // Token expires in 2 minutes
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      maxAge: 2 * 60 * 1000, // Cookie expires in 2 minutes
-      sameSite: "Strict",
-    });
+    // Simulating a delay of 1.5 seconds before redirecting
+    setTimeout(() => {
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 2 * 60 * 1000, // Cookie expires in 2 minutes
+        sameSite: "Strict",
+      });
 
-    res.redirect("/dashboard");
+      res.status(200).json({ message: "Login successful" });
+    }, 1500);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
@@ -216,7 +217,7 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     console.log(error);
   }
 });
-
+//-----------------------------------//
 /**
  * GET /
  * Admin - Create New Post
@@ -262,7 +263,7 @@ router.post("/add-post", authMiddleware, async (req, res) => {
 
 /**
  * GET /
- * Admin - Create New Post
+ * Admin - Edit Post
  */
 router.get("/edit-post/:id", authMiddleware, async (req, res) => {
   try {
@@ -285,7 +286,7 @@ router.get("/edit-post/:id", authMiddleware, async (req, res) => {
 
 /**
  * PUT /
- * Admin - Create New Post
+ * Admin - Edit New Post
  */
 router.put("/edit-post/:id", authMiddleware, async (req, res) => {
   try {

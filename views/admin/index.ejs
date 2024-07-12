@@ -1,6 +1,8 @@
 <h3>Sign In</h3>
 
-<form action="/admin" method="POST">
+<div id="message-container"></div>
+
+<form id="login-form" action="/admin" method="POST">
   <label for="username"><b>Username</b></label>
   <input type="text" placeholder="Enter Username" name="username" />
 
@@ -9,3 +11,44 @@
 
   <input type="submit" value="Login" class="btn" />
 </form>
+
+<script>
+  document
+    .getElementById("login-form")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const username = document.getElementsByName("username")[0].value;
+      const password = document.getElementsByName("password")[0].value;
+
+      try {
+        const response = await fetch("/admin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
+
+        const messageContainer = document.getElementById("message-container");
+        messageContainer.textContent = "Login successful";
+        messageContainer.classList.remove("error-message");
+        messageContainer.classList.add("success-message");
+
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
+      } catch (error) {
+        const errorDiv = document.getElementById("message-container");
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove("success-message");
+        errorDiv.classList.add("error-message");
+      }
+    });
+</script>

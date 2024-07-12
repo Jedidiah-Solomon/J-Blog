@@ -378,3 +378,33 @@ img {
   max-width: 300px;
   height: auto;
 }
+
+.error-message,
+.success-message {
+  text-align: center;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.error-message {
+  color: #b30000;
+  background-color: #ffd1d1;
+}
+
+.success-message {
+  color: #008000;
+  background-color: #d1ffd1;
+}
+
+.signup-error-message,
+.signup-success-message {
+  text-align: center;
+  margin-bottom: 10px;
+  display: none;
+}
+.signup-error-message {
+  color: #b30000;
+}
+.signup-success-message {
+  color: #008000;
+}
