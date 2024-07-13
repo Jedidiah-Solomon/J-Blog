@@ -1,4 +1,24 @@
+<!-- Paystack Modal -->
+<div id="payModal" class="modal">
+  <div class="modal-content">
+    <span class="paystack-close">&times;</span>
+    <h2>Buy me Coffee</h2>
+    <form id="payForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="amount">Amount (NGN):</label>
+      <input type="number" id="amount" name="amount" required />
+
+      <button type="submit">Pay Now</button>
+    </form>
+  </div>
+</div>
+
 <footer class="footer">
-    &copy; <%= new Date().getFullYear(); %> Jedidiah • Built with NodeJs &
-    MongoDB
+  &copy; <%= new Date().getFullYear(); %> Jedidiah • Built with NodeJs & MongoDB
+  <button id="buyCoffeeButton" class="btn">Buy me Coffee🤝</button>
 </footer>
