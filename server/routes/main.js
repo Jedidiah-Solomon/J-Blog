@@ -167,6 +167,7 @@ router.post("/subscribe", async (req, res) => {
   }
 });
 //--------Use mailchimp or database if you like, or just use formspree-------//
+
 // -----------------------------Call the functions to insert posts Mnaually from code on server------------------------------//
 // insertAgriculturePosts();
 // insertHealthPosts();
