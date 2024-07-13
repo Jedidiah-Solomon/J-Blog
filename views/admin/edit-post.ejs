@@ -1,21 +1,123 @@
 <a href="/dashboard">&larr; Back</a>
 <div class="admin-title">
-  <h2>View / Edit Post</h2>
-
-  <form action="/delete-post/<%= data._id %>?_method=DELETE" method="POST">
-    <input type="submit" value="Delete" class="btn-delete btn">
-  </form>
-
+  <h2>Edit Post</h2>
 </div>
 
-<form action="/edit-post/<%= data._id %>?_method=PUT" method="POST">
+<!-- Delete Post Form -->
+<div class="admin-title">
+  <h2>View / Edit Post</h2>
+  <form action="/delete-post/<%= data._id %>?_method=DELETE" method="POST">
+    <input type="submit" value="Delete" class="btn-delete btn" />
+  </form>
+</div>
 
+<!-- Edit Post Form -->
+<form
+  id="editPostForm"
+  action="/edit-post/<%= data._id %>?_method=PUT"
+  method="POST"
+>
   <label for="title"><b>Title</b></label>
-  <input type="text" placeholder="Post Title" name="title" value="<%= data.title %>">
+  <input
+    type="text"
+    placeholder="Post Title"
+    name="title"
+    value="<%= data.title %>"
+    required
+  />
 
   <label for="body"><b>Content</b></label>
-  <textarea name="body" cols="50" rows="10"><%= data.body %></textarea>
+  <textarea name="body" cols="50" rows="10" required><%= data.body %></textarea>
 
-  <input type="submit" value="Update" class="btn">
+  <label for="featureImg"><b>Feature Image URL</b></label>
+  <input
+    type="text"
+    placeholder="Feature Image URL"
+    name="featureImg"
+    value="<%= data.featureImg %>"
+    required
+  />
 
+  <label for="requiredImg"><b>Required Image URL</b></label>
+  <input
+    type="text"
+    placeholder="Required Image URL"
+    name="requiredImg"
+    value="<%= data.requiredImg %>"
+    required
+  />
+
+  <label for="optionalImg"><b>Optional Image URL</b></label>
+  <input
+    type="text"
+    placeholder="Optional Image URL"
+    name="optionalImg"
+    value="<%= data.optionalImg %>"
+  />
+
+  <!-- Method Override for PUT Request -->
+  <input type="hidden" name="_method" value="PUT" />
+
+  <input type="submit" value="Update" class="btn" />
 </form>
+
+<!-- Success and Error Messages -->
+<div id="message" class="edit-post-message"></div>
+
+<script>
+  document
+    .getElementById("editPostForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const formData = new FormData(form);
+
+      // Convert FormData to a plain object
+      const formDataObj = {};
+      formData.forEach((value, key) => {
+        formDataObj[key] = value;
+      });
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getCookie("token")}`,
+          },
+          body: JSON.stringify(formDataObj),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          form.reset();
+          showMessage("success", data.message);
+
+          setTimeout(() => {
+            window.location.href = `/edit-post/${formDataObj._id}`;
+            showMessage("success", "");
+          }, 1500);
+        } else {
+          showMessage("error", data.message);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        showMessage("error", "Server error. Please try again later.");
+      }
+    });
+
+  function showMessage(type, message) {
+    const messageDiv = document.getElementById("message");
+    messageDiv.textContent = message;
+    messageDiv.classList.remove("success", "error");
+    messageDiv.classList.add(type);
+  }
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+  }
+</script>

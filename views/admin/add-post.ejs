@@ -3,14 +3,108 @@
   <h2>Add New Post</h2>
 </div>
 
-<form action="/add-post" method="POST">
+<!-- Error and Success Messages -->
+<div id="message" class="post-message"></div>
 
+<form id="addPostForm" action="/add-post" method="POST">
   <label for="title"><b>Title</b></label>
-  <input type="text" placeholder="Post Title" name="title">
+  <input type="text" placeholder="Post Title" name="title" required />
 
   <label for="body"><b>Content</b></label>
-  <textarea name="body" cols="50" rows="10"></textarea>
+  <textarea name="body" cols="50" rows="10" required></textarea>
 
-  <input type="submit" value="Add" class="btn">
+  <label for="featureImg"><b>Feature Image URL</b></label>
+  <input
+    type="text"
+    placeholder="Feature Image URL"
+    name="featureImg"
+    required
+  />
 
+  <label for="requiredImg"><b>Required Image URL</b></label>
+  <input
+    type="text"
+    placeholder="Required Image URL"
+    name="requiredImg"
+    required
+  />
+
+  <label for="optionalImg"><b>Optional Image URL</b></label>
+  <input type="text" placeholder="Optional Image URL" name="optionalImg" />
+
+  <input type="submit" value="Add" class="btn" />
 </form>
+
+<script>
+  document
+    .getElementById("addPostForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const formData = new FormData(form);
+
+      // Convert FormData to a plain object
+      const formDataObj = {};
+      formData.forEach((value, key) => {
+        formDataObj[key] = value;
+      });
+
+      // Log the form data object for debugging
+      console.log("Form Data:", formDataObj);
+
+      // Validate required fields
+      const title = formData.get("title");
+      const body = formData.get("body");
+      const featureImg = formData.get("featureImg");
+      const requiredImg = formData.get("requiredImg");
+
+      if (!title || !body || !featureImg || !requiredImg) {
+        document.getElementById("message").innerHTML =
+          "Please fill out all required fields.";
+        return;
+      }
+
+      try {
+        // Function to get the JWT token from cookies
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        const token = getCookie("token");
+
+        const response = await fetch("/add-post", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formDataObj),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          form.reset();
+          document.getElementById(
+            "message"
+          ).innerHTML = `<p style="color: green; text-align: center;">${data.message}</p>`;
+
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 1500);
+        } else {
+          document.getElementById(
+            "message"
+          ).innerHTML = `<p style="color: red; text-align: center;">${data.message}</p>`;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById(
+          "message"
+        ).innerHTML = `<p style="color: red; text-align: center;">Server error. Please try again later.</p>`;
+      }
+    });
+</script>

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
+const axios = require("axios");
+
 const {
   insertAgriculturePosts,
   insertHealthPosts,
@@ -136,7 +138,36 @@ router.get("/contact", (req, res) => {
   });
 });
 
-// -----------------------------Call the functions to insert posts------------------------------//
+/**
+ * POST /
+ * Subscribe
+ */
+router.post("/subscribe", async (req, res) => {
+  const { email } = req.body;
+  const formspreeUrl = "https://formspree.io/f/xpwawpbg";
+
+  try {
+    const response = await axios.post(
+      formspreeUrl,
+      { email },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      res.json({ result: "success" });
+    } else {
+      res.status(400).json({ result: "error", message: response.statusText });
+    }
+  } catch (error) {
+    res.status(500).json({ result: "error", message: error.message });
+  }
+});
+//--------Use mailchimp or database if you like, or just use formspree-------//
+// -----------------------------Call the functions to insert posts Mnaually from code on server------------------------------//
 // insertAgriculturePosts();
 // insertHealthPosts();
 // insertTechPosts();

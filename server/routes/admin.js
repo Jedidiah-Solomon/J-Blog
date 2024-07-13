@@ -24,13 +24,13 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, jwtSecret);
-    req.userId = decoded.userId;
-    req.username = decoded.username;
+    req.user = { userId: decoded.userId, username: decoded.username };
     next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+
 //-------------------------------------------//
 /**
  * GET /register
@@ -176,18 +176,20 @@ router.post("/admin", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, username: user.username },
       jwtSecret,
-      { expiresIn: "2m" } // Token expires in 2 minutes
+      { expiresIn: "10m" } // Token expires in 10 minutes
     );
 
     // Simulating a delay of 1.5 seconds before redirecting
     setTimeout(() => {
       res.cookie("token", token, {
         httpOnly: true,
-        maxAge: 2 * 60 * 1000, // Cookie expires in 2 minutes
+        maxAge: 10 * 60 * 1000, // Cookie expires in 10 minutes
         sameSite: "Strict",
       });
 
-      res.status(200).json({ message: "Login successful" });
+      res
+        .status(200)
+        .json({ message: "Login successful", username: user.username });
     }, 1500);
   } catch (error) {
     console.log(error);
@@ -205,6 +207,7 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     const locals = {
       title: "Dashboard",
       description: "Simple Blog created with NodeJs, Express & MongoDb.",
+      username: req.user.username,
     };
 
     const data = await Post.find();
@@ -243,24 +246,39 @@ router.get("/add-post", authMiddleware, async (req, res) => {
  * POST /
  * Admin - Create New Post
  */
+// POST route to add a new post
 router.post("/add-post", authMiddleware, async (req, res) => {
   try {
-    try {
-      const newPost = new Post({
-        title: req.body.title,
-        body: req.body.body,
-      });
+    const { title, body, featureImg, requiredImg, optionalImg } = req.body;
 
-      await Post.create(newPost);
-      res.redirect("/dashboard");
-    } catch (error) {
-      console.log(error);
-    }
+    // Create a new Post object
+    const newPost = new Post({
+      title,
+      body,
+      featureImg,
+      requiredImg,
+      optionalImg,
+    });
+
+    // Save the new post to the database
+    await newPost.save();
+
+    res.status(200).json({ message: "Post added successfully!" });
   } catch (error) {
-    console.log(error);
+    console.error(error); // Log the error for debugging purposes
+
+    // Check if Mongoose validation error occurred
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Validation Error. Please check your data format.",
+      });
+    }
+
+    res.status(500).json({
+      message: "Server Error. Unable to add post. Please try again later.",
+    });
   }
 });
-
 /**
  * GET /
  * Admin - Edit Post
@@ -290,15 +308,35 @@ router.get("/edit-post/:id", authMiddleware, async (req, res) => {
  */
 router.put("/edit-post/:id", authMiddleware, async (req, res) => {
   try {
-    await Post.findByIdAndUpdate(req.params.id, {
+    const postId = req.params.id;
+
+    // Check if postId is undefined or empty
+    if (!postId) {
+      return res.status(400).json({ message: "Invalid post ID provided." });
+    }
+
+    // Update the post using Mongoose findByIdAndUpdate
+    const updatedPost = await Post.findByIdAndUpdate(postId, {
       title: req.body.title,
       body: req.body.body,
+      featureImg: req.body.featureImg,
+      requiredImg: req.body.requiredImg,
+      optionalImg: req.body.optionalImg,
       updatedAt: Date.now(),
     });
 
-    res.redirect(`/edit-post/${req.params.id}`);
+    // Check if updatedPost is null (post not found)
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    // Send success response
+    res
+      .status(200)
+      .json({ message: "Post updated successfully!", updatedPost });
   } catch (error) {
-    console.log(error);
+    console.error("Error:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
 

@@ -30,8 +30,15 @@ app.use(
     saveUninitialized: true,
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
+      ttl: 1 * 24 * 60 * 60, // 1 days in seconds
     }),
-    //cookie: { maxAge: new Date ( Date.now() + (3600000) ) }
+    cookie: {
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 1 days in milliseconds
+      secure: true, // Ensures cookies are only sent over HTTPS
+      sameSite: "Strict", // Protects against CSRF
+      // domain: '.yourdomain.com', // Replace with your actual domain if need is neccessary
+      httpOnly: true,
+    },
   })
 );
 

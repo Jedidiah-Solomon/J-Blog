@@ -1,0 +1,23 @@
+POST http://localhost:5000/add-post
+Content-Type: application/json
+# Authorization: Bearer xxxxxxxxxxxxxxxxxxx
+
+{
+  "title": "How to make riceA",
+  "body": "Rice is good ddA.",
+  "featureImg": "https://i.ibb.co/VD0gLGq/namecheap-1.png",
+  "requiredImg": "https://i.ibb.co/Jqt8w83/namecheap-2.png",
+  "optionalImg": "https://i.ibb.co/5v14dDK/namecheap-0.png"
+}
+
+
+###
+
+POST http://localhost:5000/admin
+Content-Type: application/json
+
+{
+  "username": "jane_smith",
+  "password": "Password1$"
+}
+

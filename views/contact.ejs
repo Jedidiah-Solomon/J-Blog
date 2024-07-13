@@ -1,1 +1,70 @@
-<h1>Contact Us Details</h1>
+<section class="contact-section">
+  <h1>Contact</h1>
+  <p>
+    If you have any questions or would like to get in touch, please feel free to
+    reach out.
+  </p>
+  <p>
+    Email:
+    <a href="mailto:onwubikojedidiah@gmail.com">onwubikojedidiah@gmail.com</a>
+  </p>
+  <p>Phone: +2347062957194</p>
+  <p>Address: Lagos, Nigeria</p>
+
+  <h2>Subscribe to my Newsletter</h2>
+
+  <div id="success-message" class="success-message-newsletter"></div>
+
+  <form action="/subscribe" method="POST" id="newsletter-form">
+    <label for="email"><b>Email Address</b></label>
+    <div class="newsletter-input">
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="Enter your email"
+        required
+      />
+      <button type="submit" class="btn">Subscribe</button>
+    </div>
+  </form>
+</section>
+
+<script>
+  document
+    .getElementById("newsletter-form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const emailInput = document.getElementById("email");
+      const successMessage = document.getElementById("success-message");
+
+      fetch("/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: emailInput.value }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.result === "success") {
+            successMessage.textContent = "Thank you for subscribing!";
+            successMessage.style.display = "block";
+            emailInput.value = "";
+
+            setTimeout(() => {
+              successMessage.style.display = "none";
+              window.location.href = "/";
+            }, 3000);
+          } else {
+            successMessage.textContent = "Error: " + data.message;
+            successMessage.style.display = "block";
+          }
+        })
+        .catch((error) => {
+          successMessage.textContent = "Error: " + error.message;
+          successMessage.style.display = "block";
+        });
+    });
+</script>

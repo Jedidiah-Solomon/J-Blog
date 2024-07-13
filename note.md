@@ -158,3 +158,193 @@ The { $regex: new RegExp(searchNoSpecialChar, "i") } construct is a combination 
 2. new RegExp(searchNoSpecialChar, "i") (JavaScript Syntax)
    Purpose: This part is pure JavaScript syntax for creating a regular expression object.
    Usage: In JavaScript, new RegExp(...) is used to create a regular expression object based on the provided pattern (searchNoSpecialChar in this case) and optional flags ("i" for case insensitivity).
+
+When you configure express-session with connect-mongo using MongoStore.create, it automatically creates and manages a sessions collection in your MongoDB database. This collection is where express-session stores session information such as session IDs, session data, and expiry timestamps.
+
+```
+app.use(
+  session({
+    secret: "keyboard cat", // Secret used to sign the session ID cookie
+    resave: false, // Avoid saving sessions that have not been modified
+    saveUninitialized: true, // Save new sessions even if they are not modified
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI, // MongoDB connection string
+    }),
+    // Optional cookie configuration can also be specified here
+  })
+);
+```
+
+`_id`: Unique identifier for the session.
+expires: Expiry time for the session data in MongoDB.
+session: Serialized session data, including cookie details like originalMaxAge and expires.
+
+session data in ythe MongoDB (sessions collection) is used by express-session for server-side session management, while cookies (like token) are used in the browser for client-side authentication and state management. Each serves a distinct role in managing user sessions and authentication in your web application.
+
+### cOOKIE-PARSER
+
+Here's a simple example of how you can handle a request that includes cookies using cookie-parser in an
+
+Express application:
+
+`Install cookie-parser`
+
+Setup in Express Application:
+Use cookie-parser as middleware in your Express application:
+
+```
+const express = require('express');
+const cookieParser = require('cookie-parser');
+
+const app = express();
+
+// Middleware to parse cookies
+app.use(cookieParser());
+Handling a Route:
+Assume you have a route that sets a cookie (e.g., during login) and another route that retrieves and uses that cookie:
+
+// Route to set a cookie (e.g., during login)
+app.post('/login', (req, res) => {
+  // Logic to authenticate user
+  const userId = 'exampleUserId';
+
+  // Set a cookie
+  res.cookie('userId', userId, { maxAge: 900000, httpOnly: true });
+
+  res.send('Login successful');
+});
+
+// Route to retrieve and use the cookie
+app.get('/profile', (req, res) => {
+  // Access the cookie from req.cookies
+  const userId = req.cookies.userId;
+
+  if (userId) {
+    // Logic to fetch user profile based on userId
+    res.send(`User Profile for userId: ${userId}`);
+  } else {
+    res.status(401).send('Unauthorized');
+  }
+});
+
+```
+
+Explanation:
+
+Setting Cookie: In the /login route, res.cookie('userId', userId, { maxAge: 900000, httpOnly: true }); sets a cookie named userId with a value of exampleUserId. Options like maxAge set the expiration time of the cookie.
+Retrieving Cookie: In the /profile route, req.cookies.userId retrieves the value of the userId cookie sent by the client. You can then use this value to fetch corresponding user data or perform other actions.
+Testing with a Client:
+
+You can test these routes using tools like Postman or by sending requests from a frontend application that handles cookies.
+
+This example demonstrates how cookie-parser helps parse incoming cookies (req.cookies) and how res.cookie() sets outgoing cookies in an Express application.
+
+Adjust the routes and logic based on your application's specific requirements.
+
+The cookie-parser middleware is not directly related to setting cookies using res.cookie() in Express.
+
+cookie-parser is a middleware in Express that parses cookies attached to the client's request object (req.cookies).
+It parses the Cookie header and populates req.cookies with an object keyed by the cookie names.
+After using cookie-parser, you can access cookies sent by the client in req.cookies.
+
+But Setting Cookies with `res.cookie()`:
+
+res.cookie() is a method in Express that sets a cookie in the client's browser as part of the response.
+It takes parameters like the cookie name, value, and options (such as maxAge, httpOnly, sameSite, etc.).
+
+use `https://imgbb.com/` for image hosting to get image links like:
+
+```
+https://ibb.co/bFmYMYb
+
+<a href="https://ibb.co/bFmYMYb"><img src="https://i.ibb.co/Jqt8w83/namecheap-2.png" alt="namecheap-2" border="0"></a>
+```
+
+The line <input type="hidden" name="_method" value="PUT" /> is used for method overriding in HTML forms. HTML forms by default only support GET and POST methods. However, in RESTful applications, you often need to use other HTTP methods like PUT, DELETE, PATCH, etc., to perform actions such as updating or deleting resources.
+
+Purpose of <input type="hidden" name="_method" value="PUT" />:
+Method Override: Express.js (and many other web frameworks) support method override using a technique where you include a hidden input field named `_method` in your form. The value of this field specifies the HTTP method you want to use for the request.
+
+### The isActiveRoute function
+
+The isActiveRoute function and its integration into app.js serve to help with determining if a specific route is currently active in the application. This is commonly used in templating engines to add an "active" class to navigation elements, enhancing the user experience by visually indicating which page the user is currently viewing.
+
+```
+function isActiveRoute(route, currentRoute) {
+  return route === currentRoute ? "active" : "";
+}
+
+module.exports = { isActiveRoute };
+```
+
+##### Purpose: This function takes two arguments:
+
+route: The route to be checked.
+currentRoute: The current route of the application (e.g., the route of the page being rendered).
+Functionality: It compares the two routes. If they match, it returns the string "active", otherwise, it returns an empty string.
+
+##### Integration in app.js
+
+```
+const { isActiveRoute } = require("./server/helpers/routeHelpers");
+app.locals.isActiveRoute = isActiveRoute;
+```
+
+Purpose: The isActiveRoute function is required from the routeHelpers module and is then assigned to app.locals.
+Functionality: By assigning isActiveRoute to app.locals, you make this function available globally in the application's templates. app.locals is a way to define properties that are local to the application and can be accessed in all templates rendered by the app.
+
+#### Using isActiveRoute in Templates
+
+Example: EJS Template for Navigation
+Here's an example of how you might use isActiveRoute in an EJS template to add an "active" class to a navigation link:
+
+```
+<ul class="nav">
+  <li class="<%= isActiveRoute('/', currentRoute) %>"><a href="/">Home</a></li>
+  <li class="<%= isActiveRoute('/about', currentRoute) %>"><a href="/about">About</a></li>
+  <li class="<%= isActiveRoute('/contact', currentRoute) %>"><a href="/contact">Contact</a></li>
+</ul>
+```
+
+###### Explanation:
+
+isActiveRoute('/', currentRoute): This checks if the current route is /. If it is, it returns "active", otherwise, it returns an empty string.
+The returned value is used as a class for the <li> elements. This helps in applying styles to indicate the active page.
+currentRoute would be a variable passed from the server to the template indicating the current route. For example, it could be set in your route handlers.
+Example: Setting currentRoute in Route Handlers
+In your Express route handlers, you can set currentRoute to be passed to the template:
+
+```
+app.get('/', (req, res) => {
+  res.render('index', { currentRoute: '/' });
+});
+
+app.get('/about', (req, res) => {
+  res.render('about', { currentRoute: '/about' });
+});
+
+app.get('/contact', (req, res) => {
+  res.render('contact', { currentRoute: '/contact' });
+});
+
+```
+
+##### Summary
+
+The isActiveRoute function helps in determining if a route is currently active.
+It is made globally available in your templates by assigning it to app.locals in app.js.
+In templates, it can be used to conditionally add an "active" class to navigation elements based on the current route.
+currentRoute is typically set in route handlers and passed to the template to indicate the current route.
+
+## Axios
+
+Axios is a popular JavaScript library used to make HTTP requests from Node.js or the browser. It provides a simple and elegant API for performing various types of HTTP requests, including GET, POST, PUT, DELETE, and more. Axios is often used to communicate with APIs or to send data to a server.
+
+Key Features of Axios
+Promise-based: Axios is built on Promises, making it easy to work with asynchronous requests.
+Browser and Node.js: Axios works seamlessly in both browser and Node.js environments.
+Automatic JSON Data Transformation: Axios automatically transforms JSON data, making it easier to work with APIs.
+Request and Response Interception: Axios allows you to intercept requests and responses, enabling you to add custom logic before a request is sent or after a response is received.
+Cancel Requests: Axios provides the ability to cancel ongoing requests.
+Timeouts: Axios allows you to set timeouts for requests.
+Cross-Site Request Forgery (CSRF) Protection: Axios can be configured to handle CSRF protection.
