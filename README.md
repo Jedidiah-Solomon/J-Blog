@@ -2,7 +2,7 @@
 
 ## Stack -- NodeJs, Express, EJS & MongoDB Blog
 
-`https://j-blog-dlw9.onrender.com/`
+[j-blog.com](https://j-blog-dlw9.onrender.com/)
 
 ## You need:
 
