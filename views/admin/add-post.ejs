@@ -1,3 +1,24 @@
+<!-- Include TinyMCE from the server -->
+<script src="/tinymce/tinymce.min.js"></script>
+<script>
+  tinymce.init({
+    selector: "textarea[name='body']", // Target the correct textarea
+    plugins: "link image code",
+    toolbar:
+      "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | link image | code",
+    branding: false,
+    statusbar: false,
+    license_key: "gpl",
+    menubar: true,
+    height: 500,
+    setup: function (editor) {
+      editor.on("change", function () {
+        tinymce.triggerSave();
+      });
+    },
+  });
+</script>
+
 <a href="/dashboard">&larr; Back</a>
 <div class="admin-title">
   <h2>Add New Post</h2>
@@ -11,7 +32,7 @@
   <input type="text" placeholder="Post Title" name="title" required />
 
   <label for="body"><b>Content</b></label>
-  <textarea name="body" cols="50" rows="10" required></textarea>
+  <textarea name="body" id="postContent" cols="50" rows="10"></textarea>
 
   <label for="featureImg"><b>Feature Image URL</b></label>
   <input
@@ -44,18 +65,9 @@
       const form = event.target;
       const formData = new FormData(form);
 
-      // Convert FormData to a plain object
-      const formDataObj = {};
-      formData.forEach((value, key) => {
-        formDataObj[key] = value;
-      });
-
-      // Log the form data object for debugging
-      console.log("Form Data:", formDataObj);
-
       // Validate required fields
       const title = formData.get("title");
-      const body = formData.get("body");
+      const body = tinymce.get("postContent").getContent(); // Get TinyMCE content
       const featureImg = formData.get("featureImg");
       const requiredImg = formData.get("requiredImg");
 
@@ -64,6 +76,16 @@
           "Please fill out all required fields.";
         return;
       }
+
+      // Convert FormData to a plain object and include TinyMCE content
+      const formDataObj = {};
+      formData.forEach((value, key) => {
+        formDataObj[key] = value;
+      });
+      formDataObj.body = body;
+
+      // Log the form data object for debugging
+      console.log("Form Data:", formDataObj);
 
       try {
         // Function to get the JWT token from cookies

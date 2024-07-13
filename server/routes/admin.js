@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const Post = require("../models/Post");
 const SecretAdminCode = require("../models/secretAdminCode");
@@ -176,14 +177,14 @@ router.post("/admin", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, username: user.username },
       jwtSecret,
-      { expiresIn: "10m" } // Token expires in 10 minutes
+      { expiresIn: "1h" } // Token expires in 1hr
     );
 
     // Simulating a delay of 1.5 seconds before redirecting
     setTimeout(() => {
       res.cookie("token", token, {
         httpOnly: true,
-        maxAge: 10 * 60 * 1000, // Cookie expires in 10 minutes
+        maxAge: 60 * 60 * 1000, // Cookie expires in 3600 minutes (1hr)
         sameSite: "Strict",
       });
 
@@ -290,7 +291,19 @@ router.get("/edit-post/:id", authMiddleware, async (req, res) => {
       description: "Free NodeJs User Management System",
     };
 
-    const data = await Post.findOne({ _id: req.params.id });
+    const postId = req.params.id;
+    console.log(`GET request Post id: ${postId}`); // Log the postId received
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid Post ID!" });
+    }
+
+    const data = await Post.findOne({ _id: postId });
+
+    if (!data) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
     res.render("admin/edit-post", {
       locals,
@@ -299,6 +312,7 @@ router.get("/edit-post/:id", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).send("Server Error");
   }
 });
 
@@ -309,34 +323,39 @@ router.get("/edit-post/:id", authMiddleware, async (req, res) => {
 router.put("/edit-post/:id", authMiddleware, async (req, res) => {
   try {
     const postId = req.params.id;
+    console.log(`Post id: ${postId}`);
 
-    // Check if postId is undefined or empty
-    if (!postId) {
-      return res.status(400).json({ message: "Invalid post ID provided." });
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      console.log("Invalid Post ID format");
+      return res.status(400).json({ message: "Invalid Post ID!!" });
     }
 
-    // Update the post using Mongoose findByIdAndUpdate
-    const updatedPost = await Post.findByIdAndUpdate(postId, {
-      title: req.body.title,
-      body: req.body.body,
-      featureImg: req.body.featureImg,
-      requiredImg: req.body.requiredImg,
-      optionalImg: req.body.optionalImg,
-      updatedAt: Date.now(),
-    });
+    console.log("Post ID is valid");
 
-    // Check if updatedPost is null (post not found)
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      {
+        title: req.body.title,
+        body: req.body.body,
+        featureImg: req.body.featureImg,
+        requiredImg: req.body.requiredImg,
+        optionalImg: req.body.optionalImg,
+        updatedAt: Date.now(),
+      },
+      { new: true } // Return the updated document
+    );
+
     if (!updatedPost) {
-      return res.status(404).json({ message: "Post not found." });
+      console.log("Post not found for the given ID");
+      return res.status(404).json({ message: "Post not found" });
     }
 
-    // Send success response
-    res
-      .status(200)
-      .json({ message: "Post updated successfully!", updatedPost });
+    console.log("Post updated successfully:", updatedPost);
+    res.status(200).json({ message: "Post updated successfully!" });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ message: "Server error. Please try again later." });
+    console.log("Error occurred during update:", error);
+    res.status(500).json({ message: "Server Error. Unable to update post." });
   }
 });
 

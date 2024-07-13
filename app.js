@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
+const path = require("path");
 const express = require("express");
 const expressLayout = require("express-ejs-layouts");
 const methodOverride = require("method-override");
@@ -43,6 +44,12 @@ app.use(
 );
 
 app.use(express.static("public"));
+
+// Serve TinyMCE static files
+app.use(
+  "/tinymce",
+  express.static(path.join(__dirname, "node_modules", "tinymce"))
+);
 
 // Templating Engine
 app.use(expressLayout);

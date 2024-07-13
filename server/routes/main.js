@@ -13,7 +13,7 @@ const {
  * GET /
  * HOME
  */
-router.get("", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const locals = {
       title: "NodeJs Blog | By Jedidiah",
@@ -43,20 +43,6 @@ router.get("", async (req, res) => {
       previousPage: previousPage,
       currentRoute: "/",
     });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-router.get("", async (req, res) => {
-  const locals = {
-    title: "NodeJs Blog",
-    description: "Simple Blog created with NodeJs, Express & MongoDb.",
-  };
-
-  try {
-    const data = await Post.find();
-    res.render("index", { locals, data });
   } catch (error) {
     console.log(error);
   }

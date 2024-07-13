@@ -1,3 +1,23 @@
+<script src="/tinymce/tinymce.min.js"></script>
+<script>
+  tinymce.init({
+    selector: "textarea[name='body']",
+    plugins: "link image code",
+    toolbar:
+      "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | link image | code",
+    branding: false,
+    statusbar: false,
+    license_key: "gpl",
+    menubar: true,
+    height: 1000,
+    setup: function (editor) {
+      editor.on("change", function () {
+        tinymce.triggerSave();
+      });
+    },
+  });
+</script>
+
 <a href="/dashboard">&larr; Back</a>
 <div class="admin-title">
   <h2>Edit Post</h2>
@@ -17,6 +37,8 @@
   action="/edit-post/<%= data._id %>?_method=PUT"
   method="POST"
 >
+  <input type="hidden" id="postId" name="postId" value="<%= data._id %>" />
+
   <label for="title"><b>Title</b></label>
   <input
     type="text"
@@ -96,7 +118,7 @@
           showMessage("success", data.message);
 
           setTimeout(() => {
-            window.location.href = `/edit-post/${formDataObj._id}`;
+            window.location.href = `/edit-post/${formDataObj.postId}`;
             showMessage("success", "");
           }, 1500);
         } else {

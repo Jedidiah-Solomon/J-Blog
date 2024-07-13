@@ -9,7 +9,8 @@
 
   <h2><%= data.title %></h2>
 
-  <p><%= data.body %></p>
+  <p><%- data.body %></p>
+  <%# To use TinyMCE content %>
 
   <div class="post-images">
     <img src="<%= data.requiredImg %>" alt="Required Image" class="post-img" />
