@@ -103,3 +103,4 @@ Once you have configured the service with the above settings and environment var
 ![pic-9](./public/img/pic-9.png)
 ![pic-10](./public/img/pic-10.png)
 ![pic-11](./public/img/pic-11.png)
+![pic-12](./public/img/pic-12.png)
