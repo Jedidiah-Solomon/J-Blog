@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((data) => {
       const paystackPublicKey = data.key;
 
-      console.log(paystackPublicKey);
-
       const modal = document.getElementById("payModal");
       const btn = document.getElementById("buyCoffeeButton");
       const span = document.getElementsByClassName("paystack-close")[0];
