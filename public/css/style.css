@@ -370,13 +370,14 @@ img {
 .post-images {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 25px;
   margin-top: 20px;
 }
 
 .post-img {
-  max-width: 300px;
+  max-width: 350px;
   height: auto;
+  margin-left: 10px;
 }
 
 .error-message,
