@@ -2,6 +2,8 @@
 
 ## Stack -- NodeJs, Express, EJS & MongoDB Blog
 
+#### Special thanks to RaddyBrand 1 
+
 [j-blog.com](https://j-blog-dlw9.onrender.com/)
 
 ## You need:
