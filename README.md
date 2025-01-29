@@ -20,7 +20,7 @@ PORT=5000
 MONGODB_URI=mongodb+srv://Jedybrown:<password>@cluster-nodejs-blog.cl4hvbg.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster-nodejs-blog
 MONGODB_PASSWORD=<password>
 
-JWT_SECRET=1Dj3$8uKvL#p9X*G9z!Y7s$E@dM5n^tT
+JWT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ## Installation
