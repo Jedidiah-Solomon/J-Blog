@@ -2,7 +2,7 @@
 
 ## Stack -- NodeJs, Express, EJS & MongoDB Blog
 
-#### Special thanks to RaddyBrand 1 
+#### Special thanks to RaddyBrand 1
 
 [j-blog.com](https://j-blog-dlw9.onrender.com/)
 
@@ -45,9 +45,9 @@ Create a .env file to store your credentials. Example below:
 
 ```
 PORT=5000
-MONGODB_URI=mongodb+srv://Jedybrown:<password>@cluster-nodejs-blog.cl4hvbg.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster-nodejs-blog
+MONGODB_URI=mongodb+srv://name:<password>@cluster-nodejs-blog.cl4hvbg.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster-nodejs-blog
 MONGODB_PASSWORD=<password>
-JWT_SECRET=1Dj3$8uKvL#p9X*G9z!Y7s$E@dM5n^tT
+JWT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Installation
@@ -79,9 +79,9 @@ Start Command: node app.js
 
 ```
 PORT=5000
-MONGODB_URI=mongodb+srv://Jedybrown:<password>@cluster-nodejs-blog.cl4hvbg.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster-nodejs-blog
+MONGODB_URI=mongodb+srv://name:<password>@cluster-nodejs-blog.cl4hvbg.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster-nodejs-blog
 MONGODB_PASSWORD=<password>
-JWT_SECRET=1Dj3$8uKvL#p9X*G9z!Y7s$E@dM5n^tT
+JWT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Deploy your application:
